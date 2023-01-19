@@ -1,0 +1,66 @@
+<html lang="jp">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="loading">📱 ブラウザのカメラの使用を許可してください。</div>
+    <canvas id="canvas" hidden></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+      const video = document.createElement("video");
+      const canvasElement = document.getElementById("canvas");
+      const canvas = canvasElement.getContext("2d");
+      const loading = document.getElementById("loading");
+      const output = document.getElementById("output");
+      let isReadQR = false;
+
+      navigator.mediaDevices
+        .getUserMedia({
+          video: {
+            facingMode: "environment",
+          },
+        })
+        .then((stream) => {
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          video.play();
+          requestAnimationFrame(tick);
+        });
+
+      function tick() {
+        loading.innerText = "ロード中...";
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          loading.hidden = true;
+          canvasElement.hidden = false;
+          canvasElement.height = video.videoHeight;
+          canvasElement.width = video.videoWidth;
+          canvas.drawImage(
+            video,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+          var imageData = canvas.getImageData(
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+          var code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          if (code && !isReadQR) {
+            location.href = code.data;
+            isReadQR = true;
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+    </script>
+  </body>
+</html>
