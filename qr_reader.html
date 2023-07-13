@@ -54,9 +54,15 @@
           var code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "dontInvert",
           });
+          // if (code && !isReadQR) {
+          //   location.href = code.data;
+          //   isReadQR = true;
+          // }
           if (code && !isReadQR) {
-            location.href = code.data;
-            isReadQR = true;
+            setTimeout(() => {
+              location.href = code.data;
+              isReadQR = true;
+            }, 1000); // 1秒待機してからリダイレクトとisReadQRのリセット
           }
         }
         requestAnimationFrame(tick);
